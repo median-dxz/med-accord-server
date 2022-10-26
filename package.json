@@ -1,0 +1,25 @@
+{
+  "name": "accord-server",
+  "version": "0.0.1",
+  "description": "A server for Accord -> a simple online chat room application on windows desktop platform",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "node .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/median-dxz/med-accord-server.git"
+  },
+  "keywords": [
+    "server",
+    "tcp"
+  ],
+  "author": "median-dxz",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/median-dxz/med-accord-server/issues"
+  },
+  "homepage": "https://github.com/median-dxz/med-accord-server#readme"
+}
