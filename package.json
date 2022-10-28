@@ -2,10 +2,13 @@
   "name": "accord-server",
   "version": "0.0.1",
   "description": "A server for Accord -> a simple online chat room application on windows desktop platform",
-  "main": "main.js",
+  "main": "dist/main.js",
   "type": "module",
   "scripts": {
     "start": "node .",
+    "build": "tsc",
+    "watch-ts": "tsc -w",
+    "watch-node": "nodemon --watch dist dist/main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,5 +24,11 @@
   "bugs": {
     "url": "https://github.com/median-dxz/med-accord-server/issues"
   },
-  "homepage": "https://github.com/median-dxz/med-accord-server#readme"
+  "homepage": "https://github.com/median-dxz/med-accord-server#readme",
+  "devDependencies": {
+    "@types/node": "^18.11.6",
+    "eslint": "^8.26.0",
+    "nodemon": "^2.0.20",
+    "typescript": "^4.8.4"
+  }
 }

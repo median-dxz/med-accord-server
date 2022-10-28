@@ -1,24 +1,20 @@
-import { ServerController } from "./src/server.js";
+import { ServerController } from "./server.js";
 
-import fs from "fs/promises";
+import { readFile, readdir } from "fs/promises";
 import path from "path";
-import readline from "readline";
-import { stdin, stdout } from "process";
 import http from "http";
+import { AccordServer, GlobalConfig, ServerHost } from "./type.js";
 
-/**
- * @return {Promise<import("type.js").AccordServerInfo.BaseInfo[]>}
- */
-const initAccordServers = async () => {
+const initAccordServers = async (): Promise<AccordServer.BaseInfo[]> => {
     const ServersConfigPath = path.resolve("data", "servers");
 
     let result = Promise.resolve();
-    const baseInfo = [];
-    const directories = await fs.readdir(ServersConfigPath);
+    const baseInfo: any[] | PromiseLike<any[]> = [];
+    const directories = await readdir(ServersConfigPath);
     for (let directory of directories) {
         result = result
             .then(() => {
-                const data = fs.readFile(
+                const data = readFile(
                     path.resolve(ServersConfigPath, directory, "base.json")
                 );
                 return data;
@@ -32,23 +28,21 @@ const initAccordServers = async () => {
     return result.then(() => baseInfo);
 };
 
-/**
- * @param {import("type.js").AccordServerInfo.BaseInfo[]} serverOptions
- * @param {import("type.js").ServerHost} host
- */
-const initServerListService = (serverOptions, host) => {
+const initServerListService = (
+    serverOptions: AccordServer.BaseInfo[],
+    host: ServerHost
+) => {
     const listServer = http.createServer((req, res) => {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(JSON.stringify(serverOptions));
     });
 
-    listServer.listen(host.port, host.host);
+    listServer.listen(host.port, host.hostname);
 };
 
 async function main() {
-    /** @type {import("type.js").GlobalConfig} */
-    const config = JSON.parse(
-        (await fs.readFile("./global.config.json")).toString()
+    const config: GlobalConfig = JSON.parse(
+        (await readFile("./global.config.json")).toString()
     );
 
     const servers = await initAccordServers();
