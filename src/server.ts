@@ -76,7 +76,9 @@ export const ServerController: ServerController = {
         log(`新的连接! 目标主机: ${remoteAddress}:${remotePort}`);
 
         const consume = async (data: ProtocolData) => {
-            log(data);
+            log(data.fixedLength);
+            log(data.header);
+            log(data.body.toString("utf8"));
         };
 
         const reply = async (action: Accord.ActionType) => {
@@ -94,26 +96,13 @@ export const ServerController: ServerController = {
             const fixedLength = Buffer.alloc(4);
             fixedLength.writeUInt32LE(data.fixedLength);
             socket.write(Buffer.concat([fixedLength, header, body]));
-            setTimeout(() => {
-                socket.write(fixedLength);
-            }, 1500);
-            setTimeout(() => {
-                socket.write(header);
-            }, 2500);
-            setTimeout(() => {
-                socket.write(body);
-            }, 3500);
         };
 
         setTimeout(() => {
             if (serverHash === -1) {
                 reply("timeout");
-                setTimeout(() => {
-                    socket.end();
-                    socket.destroy();
-                }, 4500);
-                // socket.end();
-                // socket.destroy();
+                socket.end();
+                socket.destroy();
             }
         }, 3000);
 
@@ -132,7 +121,7 @@ export const ServerController: ServerController = {
             let bytesRead = 0;
             let bytesToRead = 4;
 
-            if (protocolData.fixedLength == 0 && buf.length - bytesRead >= bytesToRead) {
+            if (protocolData.fixedLength == null && buf.length - bytesRead >= bytesToRead) {
                 protocolData.fixedLength = buf.readUInt32LE(0);
                 bytesRead += bytesToRead;
             }
@@ -146,13 +135,13 @@ export const ServerController: ServerController = {
                 protocolData.header = header;
                 bytesRead += bytesToRead;
             }
-            
+
             if (protocolData.header?.ContentLength) {
                 bytesToRead = protocolData.header.ContentLength;
             }
 
             if (protocolData.body == null && buf.length - bytesRead >= bytesToRead) {
-                protocolData.body = Buffer.from(buf, bytesRead, bytesRead + bytesToRead);
+                protocolData.body = Buffer.from(buf.buffer, buf.byteOffset + bytesRead, bytesToRead);
                 bytesRead += bytesToRead;
                 consume(protocolData);
                 protocolData = {};
