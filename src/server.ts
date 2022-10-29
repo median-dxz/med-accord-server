@@ -53,7 +53,9 @@ export const ServerController: ServerController = {
     init(host: ServerHost) {
         this.host = host;
         this.server = net.createServer({ keepAlive: true, keepAliveInitialDelay: 3000 }, this._handleConnection);
-        this.server.listen(host.port, host.hostname, () => {});
+        this.server.listen(host.port, host.hostname, () => {
+            log(`主服务启动`);
+        });
     },
 
     start(option: Accord.BaseInfo) {
@@ -76,8 +78,8 @@ export const ServerController: ServerController = {
         log(`新的连接! 目标主机: ${remoteAddress}:${remotePort}`);
 
         const consume = async (data: ProtocolData) => {
-            log(data.fixedLength);
-            log(data.header);
+            // log(data.fixedLength);
+            // log(data.header);
             log(data.body.toString("utf8"));
         };
 
@@ -104,7 +106,7 @@ export const ServerController: ServerController = {
                 socket.end();
                 socket.destroy();
             }
-        }, 3000);
+        }, 5 * 60 * 1000);
 
         socket.on("close", () => {
             if (serverHash !== -1) {

@@ -48,9 +48,9 @@ async function main() {
     const servers = await initAccordServers();
 
     initServerListService(servers, config.HttpServer);
+    ServerController.init(config.AccordServer);
 
     for (let option of servers) {
-        ServerController.init(config.AccordServer);
         ServerController.start(option);
     }
 }
