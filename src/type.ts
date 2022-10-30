@@ -42,6 +42,11 @@ export namespace AccordAction {
         avatar: string;
         name: string;
     }
+
+    export type UpdateMemberList = Array<{
+        avatar: string;
+        name: string;
+    }>;
 }
 
 export interface GlobalConfig {

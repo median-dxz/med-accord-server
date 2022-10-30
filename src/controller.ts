@@ -84,6 +84,25 @@ export const ServerController: ServerController = {
             }
         }, 1000);
 
+        const enter = (data: AccordAction.Enter & object) => {
+            if (!data.memberHash || !data.serverHash || !data.name) {
+                reply("refuse", "空的json字段");
+                return;
+            }
+            if (!this.servers.has(data.serverHash)) {
+                reply("refuse", "无效服务器hash");
+                return;
+            }
+            serverHash = data.serverHash;
+            memberHash = data.memberHash;
+            reply("accept", "加入服务器成功");
+            if (!this.members.has(data.memberHash)) {
+                this.members.set(memberHash, new Member(data.name, data.avatar, data.memberHash));
+            }
+            const member = this.members.get(memberHash);
+            member.enter(this.servers.get(serverHash), socket);
+        };
+
         const consume = async (header: Accord.DataHeader, body: Buffer) => {
             return new Promise<void>((resolve, reject) => {
                 log(body.toString("utf8"));
@@ -91,27 +110,15 @@ export const ServerController: ServerController = {
                     resolve();
                     return;
                 }
+                const data = body.toString("utf8");
                 switch (header.Action) {
                     case "enter":
-                        const data: AccordAction.Enter & object = JSON.parse(body.toString("utf8"));
-                        if (!data.memberHash || !data.serverHash || !data.name) {
-                            reply("refuse", "空的json字段");
-                            break;
-                        }
-                        if (!this.servers.has(data.serverHash)) {
-                            reply("refuse", "无效服务器hash");
-                            break;
-                        }
-                        serverHash = data.serverHash;
-                        memberHash = data.memberHash;
-                        reply("accept", "加入服务器成功");
-                        if (!this.members.has(data.memberHash)) {
-                            this.members.set(memberHash, new Member(data.name, data.avatar, data.memberHash));
-                        }
+                        enter(JSON.parse(data));
                         break;
-
+                    case "leave":
+                        break;
                     default:
-                        reply("refuse", "未知指令");
+                        reply("refuse", "未知动作");
                         break;
                 }
                 resolve();
@@ -123,9 +130,8 @@ export const ServerController: ServerController = {
             const data = new protocol.AccordData();
             switch (action) {
                 case "accept":
-                    data.body = Buffer.from(body);
-                    break;
                 case "refuse":
+                case "updateMemberList":
                     data.body = Buffer.from(body);
                     break;
                 default:
@@ -141,13 +147,24 @@ export const ServerController: ServerController = {
             socket.write(data.serialize());
         };
 
+        socket.addListener("update", (action: AccordAction.Type, data: any) => {
+            switch (action) {
+                case "updateMemberList":
+                    reply(action, JSON.stringify(data as AccordAction.UpdateMemberList));
+                    break;
+
+                default:
+                    break;
+            }
+        });
+
         socket.on("close", () => {
-            if (serverHash) {
-                const member = this.members.get(memberHash);
-                delete this.servers.get(serverHash).members[memberHash];
+            if (serverHash && memberHash) {
+                const server = this.servers.get(serverHash);
+                server.memberLeave(memberHash); 
+                this.members.get(memberHash).socket = null;
             }
             protocolData.clear();
-            socket.end();
             log(`连接断开! 目标主机: ${remoteAddress}:${remotePort}`);
         });
 
@@ -162,7 +179,7 @@ export const ServerController: ServerController = {
 
         socket.on("error", (err) => {
             log(`连接错误! 目标主机: ${remoteAddress}:${remotePort}`);
-            log(`错误内容: ${err.message}`);
+            log(`错误内容: ${err.stack}`);
         });
     },
 };
