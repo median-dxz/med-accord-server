@@ -1,58 +1,64 @@
-import { ServerController } from "./server.js";
+import { ServerController } from "./controller.js";
 
 import { readFile, readdir } from "fs/promises";
 import path from "path";
-import http from "http";
+import http from "node:http";
 import { AccordServer, GlobalConfig, ServerHost } from "./type.js";
 
-const initAccordServers = async (): Promise<AccordServer.BaseInfo[]> => {
+const loadServersConfig = async (): Promise<AccordServer.BaseInfo[]> => {
     const ServersConfigPath = path.resolve("data", "servers");
 
     let result = Promise.resolve();
     const baseInfo: any[] | PromiseLike<any[]> = [];
-    const directories = await readdir(ServersConfigPath);
+    const directories = await readdir(ServersConfigPath, { withFileTypes: true });
     for (let directory of directories) {
-        result = result
-            .then(() => {
-                const data = readFile(
-                    path.resolve(ServersConfigPath, directory, "base.json")
-                );
-                return data;
-            })
-            .then((data) => {
-                baseInfo.push(JSON.parse(data.toString("utf-8")));
-                return;
-            });
+        if (directory.isDirectory())
+            result = result
+                .then(() => {
+                    const data = readFile(path.resolve(ServersConfigPath, directory.name, "base.json"));
+                    return data;
+                })
+                .then((data) => {
+                    baseInfo.push(JSON.parse(data.toString("utf-8")));
+                    return;
+                });
     }
 
     return result.then(() => baseInfo);
 };
 
-const initServerListService = (
-    serverOptions: AccordServer.BaseInfo[],
-    host: ServerHost
-) => {
-    const listServer = http.createServer((req, res) => {
+const startServerService = (serverOptions: AccordServer.BaseInfo[], host: ServerHost) => {
+    const ServiceServer = http.createServer((req, res) => {
+        //JSON.stringify(serverOptions)
+        const url = new URL(req.url, `http://${req.headers.host}`);
         res.writeHead(200, { "Content-Type": "application/json" });
-        res.end(JSON.stringify(serverOptions));
+        switch (url.pathname) {
+            case "/":
+                res.end(JSON.stringify(serverOptions));
+                break;
+            case "/hash":
+                res.end(JSON.stringify(ServerController.getMemberHash()));
+                break;
+            default:
+                res.end();
+                break;
+        }
     });
 
-    listServer.listen(host.port, host.hostname);
+    ServiceServer.listen(host.port, host.hostname);
 };
 
 async function main() {
-    const config: GlobalConfig = JSON.parse(
-        (await readFile("./global.config.json")).toString()
-    );
+    const config: GlobalConfig = JSON.parse((await readFile("./global.config.json")).toString());
 
-    const servers = await initAccordServers();
+    const servers = await loadServersConfig();
 
-    initServerListService(servers, config.HttpServer);
     ServerController.init(config.AccordServer);
-
     for (let option of servers) {
-        ServerController.start(option);
+        ServerController.startServer(option);
     }
+
+    startServerService(servers, config.HttpServer);
 }
 
 main();

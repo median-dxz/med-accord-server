@@ -1,5 +1,3 @@
-import { Member } from "./member.js";
-
 export namespace AccordServer {
     export interface BaseInfo {
         hash: ServerHash;
@@ -20,10 +18,12 @@ export namespace AccordServer {
         ContentLength: number;
         ContentMime: string;
         ContentEncoding: "utf8" | "binary";
-        Action: ActionType;
+        Action: AccordAction.Type;
     }
+}
 
-    export type ActionType =
+export namespace AccordAction {
+    export type Type =
         | "enter"
         | "leave"
         | "createServer"
@@ -33,7 +33,15 @@ export namespace AccordServer {
         | "accept"
         | "receiveMessage"
         | "updateMemberList"
+        | "refuse"
         | "timeout";
+
+    export interface Enter {
+        serverHash: ServerHash;
+        memberHash: MemberHash;
+        avatar: string;
+        name: string;
+    }
 }
 
 export interface GlobalConfig {
@@ -46,5 +54,5 @@ export interface ServerHost {
     port: number;
 }
 
-export type ServerHash = number;
-export type MemberHash = number;
+export type ServerHash = string;
+export type MemberHash = string;

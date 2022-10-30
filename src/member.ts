@@ -1,42 +1,14 @@
-import crypto from "node:crypto";
 import net from "node:net";
 import { AccordServer } from "./server.js";
+import { MemberHash } from "./type.js";
 
 export class Member {
-    hash = "";
+    hash: MemberHash = "";
     name = "";
     avatar = "";
-    socket?: net.Socket = null;
-    online = false;
+    server?: AccordServer;
 
-    constructor(data: { name: string; avatar: string }) {
-        const { name, avatar } = data;
-        [this.name, this.avatar] = [name, avatar];
-    }
-
-    join(server: AccordServer) {
-        let hash = crypto.randomBytes(4).toString("hex");
-        while (Object.hasOwn(server.members, hash)) {
-            hash = crypto.randomBytes(4).toString("hex");
-        }
-        this.hash = hash;
-        server.members[hash] = this;
-        server.memberCount++;
-    }
-
-    exit(server: AccordServer) {
-        this.socket.end();
-        delete server.members[this.hash];
-        server.memberCount--;
-    }
-
-    enter(socket: net.Socket) {
-        this.socket = socket;
-        this.online = true;
-    }
-
-    leave() {
-        this.online = false;
-        this.socket.end();
+    constructor(name: string, avatar: string, hash: MemberHash) {
+        [this.name, this.avatar, this.hash] = [name, avatar, hash];
     }
 }
