@@ -1,17 +1,22 @@
-import { Socket } from "node:net";
 import { Member } from "./member.js";
-import { AccordAction, AccordServer as Accord } from "./type.js";
+import { AccordAction, ServerHash } from "./type.js";
 
 export class AccordServer {
     name = "";
     actualName = "";
     icon = "";
-    msgs: Accord.Message[] = [];
+    msgs: Message[] = [];
     members: { [hash: string]: Member } = {};
 
-    constructor(serverOption: Accord.BaseInfo) {
+    constructor(serverOption: BaseInfo) {
         this.name = serverOption.showName;
         this.actualName = serverOption.actualName;
+    }
+
+    broadcast(dataSender: Function, data: any) {
+        Object.keys(this.members).forEach((key) => {
+            dataSender.call(this.members[key], data);
+        });
     }
 
     updateMembers() {
@@ -21,10 +26,7 @@ export class AccordServer {
                 name: this.members[key].name,
             };
         });
-
-        Object.keys(this.members).forEach((key) => {
-            this.members[key].updateMembers(data);
-        });
+        this.broadcast(Member.prototype.updateMembers, data);
     }
 
     memberEnter(memberHash: string, member: Member) {
@@ -35,4 +37,33 @@ export class AccordServer {
         delete this.members[memberHash];
         this.updateMembers();
     }
+
+    messageReceive(message: Message) {
+        message.index = this.msgs.length;
+        this.msgs.push(message);
+        this.broadcast(Member.prototype.newMessage, message);
+    }
+}
+
+export interface BaseInfo {
+    hash: ServerHash;
+    showName: string;
+    icon: string;
+    actualName: string;
+}
+
+export interface Message {
+    index: number;
+    type: "image" | "file" | "text";
+    content: string | BinaryData;
+    date: number; // timestamp
+    name: string;
+    avatar: string;
+}
+
+export interface DataHeader {
+    ContentLength: number;
+    ContentMime: string;
+    ContentEncoding: "utf8" | "binary";
+    Action: AccordAction.ActionType;
 }

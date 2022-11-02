@@ -1,5 +1,6 @@
 import { Socket } from "node:net";
 import { AccordServer } from "./server.js";
+import type { Message } from "./server.js";
 import { AccordAction, MemberHash } from "./type.js";
 
 export class Member {
@@ -22,5 +23,9 @@ export class Member {
 
     updateMembers(data: AccordAction.UpdateMemberList) {
         this.socket.emit("update", "updateMemberList", data);
+    }
+
+    newMessage(message: Message) {
+        this.socket.emit("update", "receiveMessage", message);
     }
 }

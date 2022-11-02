@@ -1,8 +1,8 @@
-import { AccordServer } from "./type.js";
+import { Accord } from "./type.js";
 
 export class AccordData {
     fixedLength: number = 0;
-    header?: AccordServer.DataHeader;
+    header?: Accord.DataHeader;
     body?: Buffer;
 
     ready = false;

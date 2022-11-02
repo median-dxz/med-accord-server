@@ -3,9 +3,9 @@ import { ServerController } from "./controller.js";
 import { readFile, readdir } from "fs/promises";
 import path from "path";
 import http from "node:http";
-import { AccordServer, GlobalConfig, ServerHost } from "./type.js";
+import { Accord, GlobalConfig, ServerHost } from "./type.js";
 
-const loadServersConfig = async (): Promise<AccordServer.BaseInfo[]> => {
+const loadServersConfig = async (): Promise<Accord.BaseInfo[]> => {
     const ServersConfigPath = path.resolve("data", "servers");
 
     let result = Promise.resolve();
@@ -27,7 +27,7 @@ const loadServersConfig = async (): Promise<AccordServer.BaseInfo[]> => {
     return result.then(() => baseInfo);
 };
 
-const startServerService = (serverOptions: AccordServer.BaseInfo[], host: ServerHost) => {
+const startServerService = (serverOptions: Accord.BaseInfo[], host: ServerHost) => {
     const ServiceServer = http.createServer((req, res) => {
         //JSON.stringify(serverOptions)
         const url = new URL(req.url, `http://${req.headers.host}`);

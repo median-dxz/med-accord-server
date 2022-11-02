@@ -5,9 +5,10 @@ import net from "node:net";
 import path from "node:path";
 import * as protocol from "./data.js";
 import crypto from "node:crypto";
-import { AccordAction, MemberHash, ServerHash, ServerHost, AccordServer as Accord } from "./type.js";
-import { Member } from "./member.js";
 import { AccordServer } from "./server.js";
+import type * as Accord from "./server.js";
+import { AccordAction, MemberHash, ServerHash, ServerHost } from "./type.js";
+import { Member } from "./member.js";
 
 interface ServerController {
     host: ServerHost;
@@ -95,12 +96,18 @@ export const ServerController: ServerController = {
             }
             serverHash = data.serverHash;
             memberHash = data.memberHash;
-            reply("accept", "加入服务器成功");
+            const acceptData: AccordAction.Accept = { msg: "成功加入服务器", action: "enter" };
+            reply("accept", JSON.stringify(acceptData));
             if (!this.members.has(data.memberHash)) {
                 this.members.set(memberHash, new Member(data.name, data.avatar, data.memberHash));
             }
             const member = this.members.get(memberHash);
             member.enter(this.servers.get(serverHash), socket);
+        };
+
+        const receiveMessage = (message: Accord.Message & object) => {
+            const server = this.servers.get(serverHash);
+            server.messageReceive(message);
         };
 
         const consume = async (header: Accord.DataHeader, body: Buffer) => {
@@ -117,8 +124,15 @@ export const ServerController: ServerController = {
                         break;
                     case "leave":
                         break;
+                    case "sendMessage":
+                        receiveMessage(JSON.parse(data));
+                        break;
+                    case "updateMemberList":
+                        this.servers.get(serverHash).updateMembers()
+                        break;
                     default:
                         reply("refuse", "未知动作");
+                        log(`[${memberHash} in ${serverHash}]: Unknown Action: ${header.Action}`);
                         break;
                 }
                 resolve();
@@ -126,12 +140,14 @@ export const ServerController: ServerController = {
             });
         };
 
-        const reply = async (action: AccordAction.Type, body: string) => {
+        const reply = async (action: AccordAction.ActionType, body: string) => {
+            log(`Server>>Client ${memberHash}: ${body}`);
             const data = new protocol.AccordData();
             switch (action) {
                 case "accept":
                 case "refuse":
                 case "updateMemberList":
+                case "receiveMessage":
                     data.body = Buffer.from(body);
                     break;
                 default:
@@ -147,12 +163,14 @@ export const ServerController: ServerController = {
             socket.write(data.serialize());
         };
 
-        socket.addListener("update", (action: AccordAction.Type, data: any) => {
+        socket.addListener("update", (action: AccordAction.ActionType, data: any) => {
             switch (action) {
                 case "updateMemberList":
                     reply(action, JSON.stringify(data as AccordAction.UpdateMemberList));
                     break;
-
+                case "receiveMessage":
+                    reply(action, JSON.stringify(data as Accord.Message));
+                    break;
                 default:
                     break;
             }
@@ -161,7 +179,7 @@ export const ServerController: ServerController = {
         socket.on("close", () => {
             if (serverHash && memberHash) {
                 const server = this.servers.get(serverHash);
-                server.memberLeave(memberHash); 
+                server.memberLeave(memberHash);
                 this.members.get(memberHash).socket = null;
             }
             protocolData.clear();

@@ -1,29 +1,5 @@
-export namespace AccordServer {
-    export interface BaseInfo {
-        hash: ServerHash;
-        showName: string;
-        icon: string;
-        actualName: string;
-    }
-
-    export interface Message {
-        index: number;
-        type: "image" | "file" | "text";
-        data: string | BinaryData;
-        date: Date;
-        sender: MemberHash;
-    }
-
-    export interface DataHeader {
-        ContentLength: number;
-        ContentMime: string;
-        ContentEncoding: "utf8" | "binary";
-        Action: AccordAction.Type;
-    }
-}
-
 export namespace AccordAction {
-    export type Type =
+    export type ActionType =
         | "enter"
         | "leave"
         | "createServer"
@@ -47,6 +23,11 @@ export namespace AccordAction {
         avatar: string;
         name: string;
     }>;
+
+    export interface Accept {
+        msg: string;
+        action: ActionType;
+    }
 }
 
 export interface GlobalConfig {
