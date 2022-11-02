@@ -128,7 +128,7 @@ export const ServerController: ServerController = {
                         receiveMessage(JSON.parse(data));
                         break;
                     case "updateMemberList":
-                        this.servers.get(serverHash).updateMembers()
+                        this.servers.get(serverHash).updateMembers();
                         break;
                     default:
                         reply("refuse", "未知动作");
@@ -189,9 +189,10 @@ export const ServerController: ServerController = {
         socket.on("data", (data) => {
             log(`Server<<Client 目标主机: ${remoteAddress}:${remotePort}`);
             protocolData.prase(data);
-            if (protocolData.ready) {
+            while (protocolData.ready) {
                 consume(protocolData.header, protocolData.body);
                 protocolData.clear();
+                protocolData.prase(Buffer.alloc(0));
             }
         });
 
