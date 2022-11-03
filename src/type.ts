@@ -9,6 +9,7 @@ export namespace AccordAction {
         | "accept"
         | "receiveMessage"
         | "updateMemberList"
+        | "historyMessages"
         | "refuse"
         | "timeout";
 
@@ -27,6 +28,11 @@ export namespace AccordAction {
     export interface Accept {
         msg: string;
         action: ActionType;
+    }
+
+    export interface HistoryMessages {
+        timestamp: number;
+        limit: number;
     }
 }
 

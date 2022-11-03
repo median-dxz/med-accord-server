@@ -25,7 +25,7 @@ export class Member {
         this.socket.emit("update", "updateMemberList", data);
     }
 
-    newMessage(message: Message) {
+    newMessage(message: Message[]) {
         this.socket.emit("update", "receiveMessage", message);
     }
 }

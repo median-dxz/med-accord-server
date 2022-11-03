@@ -3,7 +3,8 @@ import { ServerController } from "./controller.js";
 import { readFile, readdir } from "fs/promises";
 import path from "path";
 import http from "node:http";
-import { Accord, GlobalConfig, ServerHost } from "./type.js";
+import type * as Accord from "./server.js";
+import { GlobalConfig, ServerHost } from "./type.js";
 
 const loadServersConfig = async (): Promise<Accord.BaseInfo[]> => {
     const ServersConfigPath = path.resolve("data", "servers");

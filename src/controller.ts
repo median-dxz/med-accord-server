@@ -130,6 +130,9 @@ export const ServerController: ServerController = {
                     case "updateMemberList":
                         this.servers.get(serverHash).updateMembers();
                         break;
+                    case "historyMessages":
+                        this.servers.get(serverHash).getHistoryMessages(JSON.parse(data));
+                        break;
                     default:
                         reply("refuse", "未知动作");
                         log(`[${memberHash} in ${serverHash}]: Unknown Action: ${header.Action}`);

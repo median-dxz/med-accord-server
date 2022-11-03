@@ -1,4 +1,4 @@
-import { Accord } from "./type.js";
+import type * as Accord from "./server.js";
 
 export class AccordData {
     fixedLength: number = 0;
