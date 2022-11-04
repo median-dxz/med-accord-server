@@ -29,7 +29,7 @@ export class AccordServer {
         this.broadcast(Member.prototype.updateMembers, data);
     }
 
-    getHistoryMessages(filter: AccordAction.HistoryMessages) {
+    getHistoryMessages(filter: AccordAction.IHistoryMessages) {
         let l = 0,
             r = this.msgs.length - 1;
         let index = 0;

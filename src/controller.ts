@@ -85,7 +85,7 @@ export const ServerController: ServerController = {
             }
         }, 1000);
 
-        const enter = (data: AccordAction.Enter & object) => {
+        const enter = (data: AccordAction.IEnter & object) => {
             if (!data.memberHash || !data.serverHash || !data.name) {
                 reply("refuse", "空的json字段");
                 return;
@@ -96,7 +96,7 @@ export const ServerController: ServerController = {
             }
             serverHash = data.serverHash;
             memberHash = data.memberHash;
-            const acceptData: AccordAction.Accept = { msg: "成功加入服务器", action: "enter" };
+            const acceptData: AccordAction.IAccept = { msg: "成功加入服务器", action: "enter" };
             reply("accept", JSON.stringify(acceptData));
             if (!this.members.has(data.memberHash)) {
                 this.members.set(memberHash, new Member(data.name, data.avatar, data.memberHash));
@@ -132,6 +132,9 @@ export const ServerController: ServerController = {
                         break;
                     case "historyMessages":
                         this.servers.get(serverHash).getHistoryMessages(JSON.parse(data));
+                        break;
+                    case "setMemberInfo":
+                        this.members.get(memberHash).update(JSON.parse(data));
                         break;
                     default:
                         reply("refuse", "未知动作");

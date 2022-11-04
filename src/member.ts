@@ -21,6 +21,12 @@ export class Member {
         this.server.updateMembers();
     }
 
+    update(newInfo: AccordAction.IMember) {
+        this.avatar = newInfo.avatar;
+        this.name = newInfo.name;
+        this.server.updateMembers();
+    }
+
     updateMembers(data: AccordAction.UpdateMemberList) {
         this.socket.emit("update", "updateMemberList", data);
     }

@@ -3,34 +3,35 @@ export namespace AccordAction {
         | "enter"
         | "leave"
         | "createServer"
-        | "changeName"
-        | "changeHash"
         | "sendMessage"
         | "accept"
         | "receiveMessage"
         | "updateMemberList"
         | "historyMessages"
+        | "setMemberInfo"
         | "refuse"
         | "timeout";
 
-    export interface Enter {
+    export interface IEnter {
         serverHash: ServerHash;
         memberHash: MemberHash;
         avatar: string;
         name: string;
     }
 
-    export type UpdateMemberList = Array<{
+    export interface IMember {
         avatar: string;
         name: string;
-    }>;
+    }
 
-    export interface Accept {
+    export type UpdateMemberList = Array<IMember>;
+
+    export interface IAccept {
         msg: string;
         action: ActionType;
     }
 
-    export interface HistoryMessages {
+    export interface IHistoryMessages {
         timestamp: number;
         limit: number;
     }
