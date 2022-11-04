@@ -131,7 +131,7 @@ export const ServerController: ServerController = {
                         this.servers.get(serverHash).updateMembers();
                         break;
                     case "historyMessages":
-                        this.servers.get(serverHash).getHistoryMessages(JSON.parse(data));
+                        this.members.get(memberHash).getHistoryMessages(JSON.parse(data));
                         break;
                     case "setMemberInfo":
                         this.members.get(memberHash).update(JSON.parse(data));

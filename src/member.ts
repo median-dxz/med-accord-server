@@ -27,6 +27,10 @@ export class Member {
         this.server.updateMembers();
     }
 
+    getHistoryMessages(filter: AccordAction.IHistoryMessages) {
+        this.newMessage(this.server.getHistoryMessages(filter));
+    }
+
     updateMembers(data: AccordAction.UpdateMemberList) {
         this.socket.emit("update", "updateMemberList", data);
     }

@@ -29,11 +29,11 @@ export class AccordServer {
         this.broadcast(Member.prototype.updateMembers, data);
     }
 
-    getHistoryMessages(filter: AccordAction.IHistoryMessages) {
+    getHistoryMessages(filter: AccordAction.IHistoryMessages): Message[] {
         let l = 0,
             r = this.msgs.length - 1;
         let index = 0;
-        
+
         while (l <= r) {
             let mid = (l + r) >> 1;
             let time = this.msgs[mid].date;
@@ -45,8 +45,7 @@ export class AccordServer {
             }
         }
 
-        const data: Message[] = this.msgs.filter((v, i) => i <= index && i >= index - filter.limit + 1);
-        this.broadcast(Member.prototype.newMessage, data);
+        return this.msgs.filter((v, i) => i <= index && i >= index - filter.limit + 1);
     }
 
     memberEnter(memberHash: string, member: Member) {
