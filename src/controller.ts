@@ -98,10 +98,15 @@ export const ServerController: ServerController = {
             memberHash = data.memberHash;
             const acceptData: AccordAction.IAccept = { msg: "成功加入服务器", action: "enter" };
             reply("accept", JSON.stringify(acceptData));
+            let member;
             if (!this.members.has(data.memberHash)) {
-                this.members.set(memberHash, new Member(data.name, data.avatar, data.memberHash));
+                member = new Member(data.name, data.avatar, data.memberHash);
+                this.members.set(memberHash, member);
+            } else {
+                member = this.members.get(memberHash);
+                member.avatar = data.avatar;
+                member.name = data.name;
             }
-            const member = this.members.get(memberHash);
             member.enter(this.servers.get(serverHash), socket);
         };
 
