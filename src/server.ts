@@ -9,7 +9,7 @@ export class AccordServer {
     members: { [hash: string]: Member } = {};
 
     constructor(serverOption: BaseInfo) {
-        this.name = serverOption.showName;
+        this.name = serverOption.displayName;
         this.actualName = serverOption.actualName;
     }
 
@@ -66,7 +66,7 @@ export class AccordServer {
 
 export interface BaseInfo {
     hash: ServerHash;
-    showName: string;
+    displayName: string;
     icon: string;
     actualName: string;
 }

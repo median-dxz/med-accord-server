@@ -61,7 +61,7 @@ export const ServerController: ServerController = {
     startServer(option: Accord.BaseInfo) {
         if (this.host != null) {
             this.servers.set(option.hash, new AccordServer(option));
-            const { showName: name } = option;
+            const { displayName: name } = option;
             log(`服务器: '${name}' 启动`);
             return true;
         } else {
