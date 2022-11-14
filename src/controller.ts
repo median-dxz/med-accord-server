@@ -117,7 +117,7 @@ export const ServerController: ServerController = {
 
         const consume = async (header: Accord.DataHeader, body: Buffer) => {
             return new Promise<void>((resolve, reject) => {
-                log(body.toString("utf8"));
+                log(`Action: ${header.Action}\nLength: ${header.ContentLength}`);
                 if (header.Action !== "enter" && !serverHash) {
                     resolve();
                     return;
@@ -152,7 +152,7 @@ export const ServerController: ServerController = {
         };
 
         const reply = async (action: AccordAction.ActionType, body: string) => {
-            log(`Server>>Client ${memberHash}: ${body}`);
+            log(`Server>>Client ${memberHash}: Package Length: ${body.length}`);
             const data = new protocol.AccordData();
             switch (action) {
                 case "accept":
