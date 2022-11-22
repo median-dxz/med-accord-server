@@ -110,11 +110,6 @@ export const ServerController: ServerController = {
             member.enter(this.servers.get(serverHash), socket);
         };
 
-        const receiveMessage = (message: Accord.Message & object) => {
-            const server = this.servers.get(serverHash);
-            server.messageReceive(message);
-        };
-
         const consume = async (header: Accord.DataHeader, body: Buffer) => {
             return new Promise<void>((resolve, reject) => {
                 log(`Action: ${header.Action}\nLength: ${header.ContentLength}`);
@@ -130,7 +125,7 @@ export const ServerController: ServerController = {
                     case "leave":
                         break;
                     case "sendMessage":
-                        receiveMessage(JSON.parse(data));
+                        this.servers.get(serverHash).messageReceive(JSON.parse(data));
                         break;
                     case "updateMemberList":
                         this.servers.get(serverHash).updateMembers();
